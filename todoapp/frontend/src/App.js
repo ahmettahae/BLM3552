@@ -6,14 +6,14 @@ function App() {
   const [filter, setFilter] = useState('hepsi');
 
   useEffect(() => {
-    fetch('http://34.227.71.172:5000/todos')
+    fetch('http://3.88.86.108:5000/todos')
       .then(res => res.json())
       .then(data => setTodos(data));
   }, []);
 
   const addTodo = () => {
     if (!text.trim()) return;
-    fetch('http://34.227.71.172:5000/todos', {
+    fetch('http://3.88.86.108:5000/todos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text })
@@ -23,12 +23,12 @@ function App() {
   };
 
   const deleteTodo = (id) => {
-    fetch(`http://34.227.71.172:5000/todos/${id}`, { method: 'DELETE' })
+    fetch(`http://3.88.86.108:5000/todos/${id}`, { method: 'DELETE' })
       .then(() => setTodos(todos.filter(t => t.id !== id)));
   };
 
   const toggleTodo = (id) => {
-    fetch(`http://34.227.71.172:5000/todos/${id}`, { method: 'PUT' })
+    fetch(`http://3.88.86.108:5000/todos/${id}`, { method: 'PUT' })
       .then(res => res.json())
       .then(updated => setTodos(todos.map(t => t.id === id ? updated : t)));
   };
