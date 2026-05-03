@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Ticaret Uygulaması</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+    }
+
+    header {
+      background: #2c3e50;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 24px;
+    }
+
+    nav button {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      margin-left: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    nav button:hover {
+      background: #c0392b;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    .auth-box {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .auth-box input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .auth-box button {
+      width: 100%;
+      padding: 12px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .auth-box button:hover {
+      background: #34495e;
+    }
+
+    .auth-box p {
+      text-align: center;
+      margin-top: 15px;
+      color: #666;
+    }
+
+    .auth-box a {
+      color: #e74c3c;
+      cursor: pointer;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-card h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    .product-card .price {
+      font-size: 22px;
+      color: #e74c3c;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .product-card .stock {
+      color: #27ae60;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .product-card .category {
+      background: #ecf0f1;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: #666;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .product-card button {
+      width: 100%;
+      padding: 10px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .product-card button:hover {
+      background: #c0392b;
+    }
+
+    .cart-item {
+      background: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .cart-item .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cart-item .qty-controls button {
+      background: #2c3e50;
+      color: white;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .cart-item .qty-controls span {
+      font-size: 16px;
+      font-weight: bold;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .cart-item .remove-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .cart-total {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .cart-total h3 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+
+    .cart-total input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .cart-total button {
+      width: 100%;
+      padding: 12px;
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .order-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .order-card h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    .order-card .status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .status.pending {
+      background: #f39c12;
+      color: white;
+    }
+
+    .status.delivered {
+      background: #27ae60;
+      color: white;
+    }
+
+    .status.cancelled {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .order-card .cancel-btn {
+      margin-top: 10px;
+      padding: 8px 15px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .account-box {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .account-box h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 22px;
+    }
+
+    .account-box p {
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .account-box button {
+      width: 100%;
+      padding: 12px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .message {
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .search-bar button {
+      padding: 10px 20px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>🛒 E-Ticaret</h1>
+    <nav>
+      <button onclick="showSection('products')">Ürünler</button>
+      <button onclick="showSection('cart')">Sepet (<span id="cart-count">0</span>)</button>
+      <button onclick="showSection('orders')">Siparişlerim</button>
+      <button id="auth-btn" onclick="handleAuthBtn()">Giriş Yap</button>
+      <button id="admin-btn" onclick="showSection('admin')" style="display:none;background:#8e44ad">Admin
+        Paneli</button>
+    </nav>
+  </header>
+
+  <div class="container">
+
+    <!-- Auth -->
+    <div id="auth" class="section active">
+      <div class="auth-box">
+        <h2 id="auth-title">Giriş Yap</h2>
+        <div id="auth-message"></div>
+        <input type="text" id="auth-name" placeholder="Ad Soyad" style="display:none">
+        <input type="email" id="auth-email" placeholder="E-posta">
+        <input type="password" id="auth-password" placeholder="Şifre">
+        <button onclick="handleAuth()">Giriş Yap</button>
+        <p>Hesabın yok mu? <a onclick="toggleAuth()">Kayıt Ol</a></p>
+      </div>
+    </div>
+
+    <!-- Hesabım -->
+    <div id="account" class="section">
+      <div class="account-box">
+        <h3 id="account-name">Hesabım</h3>
+        <p id="account-email"></p>
+        <button onclick="logout()">Çıkış Yap</button>
+      </div>
+    </div>
+
+    <!-- Ürünler -->
+    <div id="products" class="section">
+      <h2>Ürünler</h2>
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Ürün ara...">
+        <button onclick="searchProducts()">Ara</button>
+        <button onclick="loadProducts()">Tümü</button>
+      </div>
+      <div id="products-list" class="products-grid"></div>
+    </div>
+
+    <!-- Sepet -->
+    <div id="cart" class="section">
+      <h2>Sepetim</h2>
+      <div id="cart-list"></div>
+      <div class="cart-total">
+        <h3>Toplam: <span id="cart-total">0</span> ₺</h3>
+        <input type="text" id="address-input" placeholder="Teslimat adresi">
+        <button onclick="placeOrder()">Sipariş Ver</button>
+      </div>
+    </div>
+
+    <!-- Siparişler -->
+    <div id="orders" class="section">
+      <h2>Siparişlerim</h2>
+      <div id="orders-list"></div>
+    </div>
+
+  </div>
+  <!-- Admin Paneli -->
+  <div id="admin" class="section">
+    <h2>Admin Paneli</h2>
+    <div style="background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);max-width:500px">
+      <h3 id="admin-form-title" style="margin-bottom:15px;color:#2c3e50">Ürün Ekle</h3>
+      <input type="hidden" id="edit-product-id">
+      <input type="text" id="admin-name" placeholder="Ürün adı"
+        style="width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:5px">
+      <input type="text" id="admin-description" placeholder="Açıklama"
+        style="width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:5px">
+      <input type="number" id="admin-price" placeholder="Fiyat"
+        style="width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:5px">
+      <input type="number" id="admin-stock" placeholder="Stok"
+        style="width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:5px">
+      <input type="text" id="admin-category" placeholder="Kategori"
+        style="width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:5px">
+      <button onclick="saveProduct()"
+        style="width:100%;padding:12px;background:#27ae60;color:white;border:none;border-radius:5px;cursor:pointer;font-size:16px;margin-top:10px">Kaydet</button>
+      <button onclick="resetAdminForm()"
+        style="width:100%;padding:12px;background:#95a5a6;color:white;border:none;border-radius:5px;cursor:pointer;font-size:14px;margin-top:5px">Temizle</button>
+    </div>
+
+    <h3 style="margin:30px 0 15px;color:#2c3e50">Ürün Listesi</h3>
+    <div id="admin-products-list"></div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000/api';
+    let token = localStorage.getItem('token');
+    let user = JSON.parse(localStorage.getItem('user') || 'null');
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    let isLogin = true;
+
+    function showSection(name) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(name).classList.add('active');
+      if (name === 'products') loadProducts();
+      if (name === 'cart') renderCart();
+      if (name === 'orders') loadOrders();
+      if (name === 'account') renderAccount();
+      if (name === 'admin') loadAdminProducts();
+    }
+
+    function handleAuthBtn() {
+      if (token) {
+        showSection('account');
+      } else {
+        showSection('auth');
+      }
+    }
+
+    function toggleAuth() {
+      isLogin = !isLogin;
+      document.getElementById('auth-title').textContent = isLogin ? 'Giriş Yap' : 'Kayıt Ol';
+      document.getElementById('auth-name').style.display = isLogin ? 'none' : 'block';
+      document.querySelector('.auth-box button').textContent = isLogin ? 'Giriş Yap' : 'Kayıt Ol';
+    }
+
+    function showMessage(id, msg, type) {
+      document.getElementById(id).innerHTML = `<div class="message ${type}">${msg}</div>`;
+      setTimeout(() => document.getElementById(id).innerHTML = '', 3000);
+    }
+
+    async function handleAuth() {
+      const email = document.getElementById('auth-email').value;
+      const password = document.getElementById('auth-password').value;
+      const name = document.getElementById('auth-name').value;
+
+      const url = isLogin ? `${API}/auth/login` : `${API}/auth/register`;
+      const body = isLogin ? { email, password } : { name, email, password };
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        if (isLogin) {
+          token = data.token;
+          user = data.user;
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(user));
+          document.getElementById('auth-btn').textContent = user.name;
+          if (data.user.role === 'admin') {
+            document.getElementById('admin-btn').style.display = 'inline-block';
+          }
+          showSection('products');
+        } else {
+          showMessage('auth-message', 'Kayıt başarılı! Giriş yapabilirsiniz.', 'success');
+          toggleAuth();
+        }
+      } else {
+        showMessage('auth-message', data.message, 'error');
+      }
+    }
+
+    function renderAccount() {
+      if (!user) return;
+      document.getElementById('account-name').textContent = user.name;
+      document.getElementById('account-email').textContent = user.email;
+    }
+
+    function logout() {
+      token = null;
+      user = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      document.getElementById('auth-btn').textContent = 'Giriş Yap';
+      showSection('auth');
+    }
+
+    async function loadProducts() {
+      const res = await fetch(`${API}/products`);
+      const products = await res.json();
+      renderProducts(products);
+    }
+
+    async function searchProducts() {
+      const q = document.getElementById('search-input').value;
+      const res = await fetch(`${API}/products?search=${q}`);
+      const products = await res.json();
+      renderProducts(products);
+    }
+
+    function renderProducts(products) {
+      const list = document.getElementById('products-list');
+      if (!products.length) { list.innerHTML = '<p>Ürün bulunamadı.</p>'; return; }
+      list.innerHTML = products.map(p => `
+      <div class="product-card">
+        <span class="category">${p.category || 'Genel'}</span>
+        <h3>${p.name}</h3>
+        <p style="color:#666;font-size:13px;margin-bottom:10px">${p.description || ''}</p>
+        <div class="price">${Number(p.price).toLocaleString('tr-TR')} ₺</div>
+        <div class="stock">Stok: ${p.stock}</div>
+        <button onclick="addToCart('${p.id}', '${p.name}', ${p.price})">Sepete Ekle</button>
+      </div>
+    `).join('');
+    }
+
+    function addToCart(id, name, price) {
+      if (!token) { showSection('auth'); return; }
+      const existing = cart.find(i => i.productId === id);
+      if (existing) { existing.quantity++; }
+      else { cart.push({ productId: id, name, price, quantity: 1 }); }
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+      alert(`${name} sepete eklendi!`);
+    }
+
+    function updateCartCount() {
+      document.getElementById('cart-count').textContent = cart.reduce((a, i) => a + i.quantity, 0);
+    }
+
+    function changeQty(id, delta) {
+      const item = cart.find(i => i.productId === id);
+      if (!item) return;
+      item.quantity += delta;
+      if (item.quantity <= 0) cart = cart.filter(i => i.productId !== id);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+      renderCart();
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(i => i.productId !== id);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+      renderCart();
+    }
+
+    function renderCart() {
+      const list = document.getElementById('cart-list');
+      if (!cart.length) { list.innerHTML = '<p>Sepetiniz boş.</p>'; return; }
+      list.innerHTML = cart.map(i => `
+      <div class="cart-item">
+        <div>
+          <strong>${i.name}</strong>
+          <p style="color:#666;font-size:13px">${Number(i.price).toLocaleString('tr-TR')} ₺ / adet</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:15px">
+          <div class="qty-controls">
+            <button onclick="changeQty('${i.productId}', -1)">-</button>
+            <span>${i.quantity}</span>
+            <button onclick="changeQty('${i.productId}', 1)">+</button>
+          </div>
+          <strong>${(i.quantity * i.price).toLocaleString('tr-TR')} ₺</strong>
+          <button class="remove-btn" onclick="removeFromCart('${i.productId}')">Çıkar</button>
+        </div>
+      </div>
+    `).join('');
+      const total = cart.reduce((a, i) => a + i.quantity * i.price, 0);
+      document.getElementById('cart-total').textContent = total.toLocaleString('tr-TR');
+    }
+
+    async function placeOrder() {
+      if (!token) { showSection('auth'); return; }
+      const address = document.getElementById('address-input').value;
+      if (!address) { alert('Lütfen adres girin!'); return; }
+      if (!cart.length) { alert('Sepetiniz boş!'); return; }
+
+      const res = await fetch(`${API}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ address, items: cart })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        cart = [];
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        alert('Siparişiniz oluşturuldu!');
+        showSection('orders');
+      } else {
+        alert(data.message);
+      }
+    }
+
+    async function cancelOrder(id) {
+      if (!confirm('Siparişi iptal etmek istediğinize emin misiniz?')) return;
+      const res = await fetch(`${API}/orders/${id}/cancel`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        alert('Sipariş iptal edildi!');
+        loadOrders();
+      } else {
+        alert('Sipariş iptal edilemedi!');
+      }
+    }
+
+    async function loadOrders() {
+      if (!token) { showSection('auth'); return; }
+      const res = await fetch(`${API}/orders/my`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const orders = await res.json();
+      const list = document.getElementById('orders-list');
+      if (!orders.length) { list.innerHTML = '<p>Henüz siparişiniz yok.</p>'; return; }
+      list.innerHTML = orders.map(o => `
+      <div class="order-card">
+        <h3>Sipariş #${o.id.substring(0, 8)}</h3>
+        <span class="status ${o.status}">${o.status}</span>
+        <p>Toplam: <strong>${Number(o.total).toLocaleString('tr-TR')} ₺</strong></p>
+        <p>Adres: ${o.address}</p>
+        ${o.status === 'pending' ? `<button class="cancel-btn" onclick="cancelOrder('${o.id}')">Siparişi İptal Et</button>` : ''}
+      </div>
+    `).join('');
+    }
+
+    if (token && user) {
+      document.getElementById('auth-btn').textContent = user.name;
+      if (user.role === 'admin') {
+        document.getElementById('admin-btn').style.display = 'inline-block';
+      }
+      showSection('products');
+    }
+
+    updateCartCount();
+    async function saveProduct() {
+      const id = document.getElementById('edit-product-id').value;
+      const body = {
+        name: document.getElementById('admin-name').value,
+        description: document.getElementById('admin-description').value,
+        price: document.getElementById('admin-price').value,
+        stock: document.getElementById('admin-stock').value,
+        category: document.getElementById('admin-category').value,
+      };
+
+      const url = id ? `${API}/products/${id}` : `${API}/products`;
+      const method = id ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        alert(id ? 'Ürün güncellendi!' : 'Ürün eklendi!');
+        resetAdminForm();
+        loadAdminProducts();
+      } else {
+        alert('Hata oluştu!');
+      }
+    }
+
+    function resetAdminForm() {
+      document.getElementById('edit-product-id').value = '';
+      document.getElementById('admin-name').value = '';
+      document.getElementById('admin-description').value = '';
+      document.getElementById('admin-price').value = '';
+      document.getElementById('admin-stock').value = '';
+      document.getElementById('admin-category').value = '';
+      document.getElementById('admin-form-title').textContent = 'Ürün Ekle';
+    }
+
+    async function loadAdminProducts() {
+      const res = await fetch(`${API}/products`);
+      const products = await res.json();
+      const list = document.getElementById('admin-products-list');
+      list.innerHTML = products.map(p => `
+      <div style="background:white;padding:15px 20px;border-radius:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,0.05)">
+        <div>
+          <strong>${p.name}</strong>
+          <p style="color:#666;font-size:13px">${Number(p.price).toLocaleString('tr-TR')} ₺ | Stok: ${p.stock} | ${p.category}</p>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button onclick="editProduct('${p.id}','${p.name}','${p.description}',${p.price},${p.stock},'${p.category}')" style="padding:8px 15px;background:#f39c12;color:white;border:none;border-radius:5px;cursor:pointer">Düzenle</button>
+          <button onclick="deleteProduct('${p.id}')" style="padding:8px 15px;background:#e74c3c;color:white;border:none;border-radius:5px;cursor:pointer">Sil</button>
+        </div>
+      </div>
+    `).join('');
+    }
+
+    function editProduct(id, name, description, price, stock, category) {
+      document.getElementById('edit-product-id').value = id;
+      document.getElementById('admin-name').value = name;
+      document.getElementById('admin-description').value = description;
+      document.getElementById('admin-price').value = price;
+      document.getElementById('admin-stock').value = stock;
+      document.getElementById('admin-category').value = category;
+      document.getElementById('admin-form-title').textContent = 'Ürün Güncelle';
+      window.scrollTo(0, 0);
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm('Ürünü silmek istediğinize emin misiniz?')) return;
+      const res = await fetch(`${API}/products/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        alert('Ürün silindi!');
+        loadAdminProducts();
+      }
+    }
+  </script>
+</body>
+
+</html>

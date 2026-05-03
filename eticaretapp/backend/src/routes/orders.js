@@ -63,4 +63,17 @@ router.get('/:id', authMiddleware, async (req, res) => {
   }
 });
 
+router.put('/:id/cancel', authMiddleware, async (req, res) => {
+  try {
+    const order = await Order.findByPk(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Sipariş bulunamadı' });
+    if (order.userId !== req.user.id) return res.status(403).json({ message: 'Yetkisiz' });
+    if (order.status !== 'pending') return res.status(400).json({ message: 'Bu sipariş iptal edilemez' });
+    await order.update({ status: 'cancelled' });
+    res.json({ message: 'Sipariş iptal edildi' });
+  } catch (err) {
+    res.status(500).json({ message: 'Sunucu hatası', error: err.message });
+  }
+});
+
 module.exports = router;
