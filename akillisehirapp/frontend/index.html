@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akıllı Şehir Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #0f1724; color: #fff; }
+    
+    header { background: #1a2438; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #00d4ff; }
+    header h1 { color: #00d4ff; font-size: 24px; }
+    .status { display: flex; align-items: center; gap: 8px; }
+    .status-dot { width: 10px; height: 10px; background: #00ff88; border-radius: 50%; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .card { background: #1a2438; border-radius: 12px; padding: 20px; border: 1px solid #2a3548; text-align: center; }
+    .card .icon { font-size: 36px; margin-bottom: 10px; }
+    .card .label { color: #8892a4; font-size: 13px; margin-bottom: 8px; }
+    .card .value { font-size: 32px; font-weight: bold; }
+    .card.temp .value { color: #ff6b6b; }
+    .card.humidity .value { color: #4ecdc4; }
+    .card.traffic .value { color: #f7dc6f; }
+    .card.air .value { color: #82e0aa; }
+    .card.energy .value { color: #bb8fce; }
+
+    .charts { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .chart-box { background: #1a2438; border-radius: 12px; padding: 20px; border: 1px solid #2a3548; }
+    .chart-box h3 { color: #8892a4; font-size: 14px; margin-bottom: 15px; }
+
+    .devices { background: #1a2438; border-radius: 12px; padding: 20px; border: 1px solid #2a3548; }
+    .devices h2 { color: #00d4ff; margin-bottom: 15px; }
+    .device-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #2a3548; }
+    .device-item:last-child { border-bottom: none; }
+    .device-name { font-size: 14px; }
+    .device-location { color: #8892a4; font-size: 12px; }
+    .device-status { background: #00ff88; color: #0f1724; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+
+    .connection-info { background: #1a2438; border-radius: 12px; padding: 15px 20px; margin-bottom: 20px; border: 1px solid #2a3548; display: flex; align-items: center; gap: 10px; }
+    .connection-info span { color: #8892a4; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🏙️ Akıllı Şehir Dashboard</h1>
+  <div class="status">
+    <div class="status-dot"></div>
+    <span id="conn-status">Bağlanıyor...</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="connection-info">
+    <span>🔌 WebSocket:</span>
+    <span id="ws-info">ws://localhost:3001</span>
+    <span>|</span>
+    <span>📡 Son güncelleme: <span id="last-update">-</span></span>
+  </div>
+
+  <!-- Kartlar -->
+  <div class="cards">
+    <div class="card temp">
+      <div class="icon">🌡️</div>
+      <div class="label">Sıcaklık</div>
+      <div class="value"><span id="temp-value">--</span>°C</div>
+    </div>
+    <div class="card humidity">
+      <div class="icon">💧</div>
+      <div class="label">Nem</div>
+      <div class="value"><span id="humidity-value">--</span>%</div>
+    </div>
+    <div class="card traffic">
+      <div class="icon">🚗</div>
+      <div class="label">Trafik Yoğunluğu</div>
+      <div class="value"><span id="traffic-value">--</span>%</div>
+    </div>
+    <div class="card air">
+      <div class="icon">🌿</div>
+      <div class="label">Hava Kalitesi (AQI)</div>
+      <div class="value"><span id="air-value">--</span></div>
+    </div>
+    <div class="card energy">
+      <div class="icon">⚡</div>
+      <div class="label">Enerji Tüketimi</div>
+      <div class="value"><span id="energy-value">--</span>kW</div>
+    </div>
+  </div>
+
+  <!-- Grafikler -->
+  <div class="charts">
+    <div class="chart-box">
+      <h3>🌡️ Sıcaklık Değişimi</h3>
+      <canvas id="tempChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>🚗 Trafik Yoğunluğu</h3>
+      <canvas id="trafficChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>🌿 Hava Kalitesi</h3>
+      <canvas id="airChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>⚡ Enerji Tüketimi</h3>
+      <canvas id="energyChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Cihazlar -->
+  <div class="devices">
+    <h2>📡 IoT Cihazları</h2>
+    <div id="devices-list"></div>
+  </div>
+
+</div>
+
+<script>
+  const API = 'http://localhost:3001';
+  const WS_URL = 'ws://localhost:3001';
+
+  // Chart oluştur
+  function createChart(id, label, color) {
+    const ctx = document.getElementById(id).getContext('2d');
+    return new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label,
+          data: [],
+          borderColor: color,
+          backgroundColor: color + '22',
+          borderWidth: 2,
+          pointRadius: 3,
+          tension: 0.4,
+          fill: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#8892a4', maxTicksLimit: 6 }, grid: { color: '#2a3548' } },
+          y: { ticks: { color: '#8892a4' }, grid: { color: '#2a3548' } }
+        }
+      }
+    });
+  }
+
+  const tempChart = createChart('tempChart', 'Sıcaklık', '#ff6b6b');
+  const trafficChart = createChart('trafficChart', 'Trafik', '#f7dc6f');
+  const airChart = createChart('airChart', 'Hava Kalitesi', '#82e0aa');
+  const energyChart = createChart('energyChart', 'Enerji', '#bb8fce');
+
+  function updateChart(chart, time, value) {
+    const label = new Date(time).toLocaleTimeString('tr-TR');
+    chart.data.labels.push(label);
+    chart.data.datasets[0].data.push(value);
+    if (chart.data.labels.length > 15) {
+      chart.data.labels.shift();
+      chart.data.datasets[0].data.shift();
+    }
+    chart.update();
+  }
+
+  // WebSocket bağlantısı
+  function connectWS() {
+    const ws = new WebSocket(WS_URL);
+
+    ws.onopen = () => {
+      document.getElementById('conn-status').textContent = 'Bağlı ✓';
+      document.getElementById('conn-status').style.color = '#00ff88';
+    };
+
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'update') {
+        const { temperature, humidity, traffic, airQuality, energy } = msg.data;
+        
+        document.getElementById('temp-value').textContent = temperature.value;
+        document.getElementById('humidity-value').textContent = humidity.value;
+        document.getElementById('traffic-value').textContent = traffic.value;
+        document.getElementById('air-value').textContent = airQuality.value;
+        document.getElementById('energy-value').textContent = energy.value;
+        document.getElementById('last-update').textContent = new Date().toLocaleTimeString('tr-TR');
+
+        updateChart(tempChart, temperature.time, temperature.value);
+        updateChart(trafficChart, traffic.time, traffic.value);
+        updateChart(airChart, airQuality.time, airQuality.value);
+        updateChart(energyChart, energy.time, energy.value);
+      }
+    };
+
+    ws.onclose = () => {
+      document.getElementById('conn-status').textContent = 'Bağlantı kesildi, yeniden bağlanıyor...';
+      document.getElementById('conn-status').style.color = '#ff6b6b';
+      setTimeout(connectWS, 3000);
+    };
+  }
+
+  // Cihazları yükle
+  async function loadDevices() {
+    const res = await fetch(`${API}/api/devices`);
+    const { devices } = await res.json();
+    document.getElementById('devices-list').innerHTML = devices.map(d => `
+      <div class="device-item">
+        <div>
+          <div class="device-name">${d.name}</div>
+          <div class="device-location">📍 ${d.location}</div>
+        </div>
+        <span class="device-status">AKTİF</span>
+      </div>
+    `).join('');
+  }
+
+  connectWS();
+  loadDevices();
+</script>
+</body>
+</html>
