@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Akış Uygulaması</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #141414;
+      color: #fff;
+    }
+
+    header {
+      background: #e50914;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .upload-box {
+      background: #222;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 2px dashed #444;
+    }
+
+    .upload-box h2 {
+      margin-bottom: 20px;
+      color: #e50914;
+    }
+
+    .upload-box input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      background: #333;
+      border: 1px solid #555;
+      border-radius: 5px;
+      color: #fff;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .upload-box input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      background: #333;
+      border: 1px solid #555;
+      border-radius: 5px;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+
+    .upload-box button {
+      padding: 12px 30px;
+      background: #e50914;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .upload-box button:hover {
+      background: #b00710;
+    }
+
+    .progress {
+      margin-top: 15px;
+      display: none;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #333;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #e50914;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      color: #aaa;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .videos-section h2 {
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .video-card {
+      background: #222;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .video-card video {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .video-info {
+      padding: 15px;
+    }
+
+    .video-info h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .video-info p {
+      color: #aaa;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .video-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .video-actions button {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .btn-play {
+      background: #e50914;
+      color: white;
+    }
+
+    .btn-delete {
+      background: #333;
+      color: #aaa;
+    }
+
+    .btn-delete:hover {
+      background: #555;
+    }
+
+    .player-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .player-modal.active {
+      display: flex;
+    }
+
+    .player-modal.active {
+      display: flex;
+    }
+
+    .player-modal video {
+      max-width: 900px;
+      width: 90%;
+      border-radius: 10px;
+    }
+
+    .player-modal button {
+      margin-top: 20px;
+      padding: 10px 30px;
+      background: #e50914;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .message {
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .message.success {
+      background: #1a472a;
+      color: #00ff88;
+    }
+
+    .message.error {
+      background: #4a1a1a;
+      color: #ff6b6b;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 60px;
+      color: #555;
+    }
+
+    .empty p {
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>🎬 VideoStream</h1>
+    <span style="color:#ffcdd2;font-size:13px">AWS S3 Video Platformu</span>
+  </header>
+
+  <div class="container">
+
+    <!-- Upload -->
+    <div class="upload-box">
+      <h2>Video Yükle</h2>
+      <div id="upload-message"></div>
+      <input type="text" id="video-title" placeholder="Video başlığı (opsiyonel)">
+      <input type="file" id="video-file" accept="video/*">
+      <button onclick="uploadVideo()">📤 Yükle</button>
+      <div class="progress" id="progress">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <p class="progress-text" id="progress-text">Yükleniyor...</p>
+      </div>
+    </div>
+
+    <!-- Videos -->
+    <div class="videos-section">
+      <h2>📹 Videolar</h2>
+      <div id="videos-grid" class="videos-grid"></div>
+    </div>
+
+  </div>
+
+  <!-- Player Modal -->
+  <div class="player-modal" id="player-modal" onclick="closePlayer()">
+    <div onclick="event.stopPropagation()" style="position:relative;width:90%;max-width:900px">
+      <button onclick="closePlayer()"
+        style="position:absolute;top:-40px;right:0;background:#e50914;color:white;border:none;border-radius:5px;padding:8px 20px;cursor:pointer;font-size:14px">✕
+        Kapat</button> <video id="modal-video" controls autoplay
+        style="width:100%;border-radius:10px;max-height:80vh"></video>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3002/api';
+
+    async function uploadVideo() {
+      const file = document.getElementById('video-file').files[0];
+      const title = document.getElementById('video-title').value;
+
+      if (!file) { showMessage('upload-message', 'Lütfen video seçin!', 'error'); return; }
+
+      const formData = new FormData();
+      formData.append('video', file);
+      formData.append('title', title || file.name);
+
+      document.getElementById('progress').style.display = 'block';
+      document.getElementById('progress-fill').style.width = '0%';
+      document.getElementById('progress-text').textContent = 'Yükleniyor...';
+
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            document.getElementById('progress-fill').style.width = pct + '%';
+            document.getElementById('progress-text').textContent = `Yükleniyor... %${pct}`;
+          }
+        };
+
+        xhr.onload = () => {
+          document.getElementById('progress').style.display = 'none';
+          if (xhr.status === 201) {
+            showMessage('upload-message', 'Video başarıyla yüklendi!', 'success');
+            document.getElementById('video-file').value = '';
+            document.getElementById('video-title').value = '';
+            loadVideos();
+          } else {
+            showMessage('upload-message', 'Yükleme hatası!', 'error');
+          }
+        };
+
+        xhr.open('POST', `${API}/videos/upload`);
+        xhr.send(formData);
+      } catch (err) {
+        showMessage('upload-message', 'Hata: ' + err.message, 'error');
+      }
+    }
+
+    async function loadVideos() {
+      try {
+        const res = await fetch(`${API}/videos`);
+        const videos = await res.json();
+        const grid = document.getElementById('videos-grid');
+
+        if (!videos.length) {
+          grid.innerHTML = '<div class="empty"><p>Henüz video yüklenmemiş</p></div>';
+          return;
+        }
+
+        grid.innerHTML = videos.map(v => `
+        <div class="video-card">
+          <video src="${v.url}" preload="metadata"></video>
+          <div class="video-info">
+            <h3>${v.title}</h3>
+            <p>${formatSize(v.size)} • ${new Date(v.lastModified).toLocaleDateString('tr-TR')}</p>
+            <div class="video-actions">
+              <button class="btn-play" onclick="playVideo('${v.url}')">▶ Oynat</button>
+              <button class="btn-delete" onclick="deleteVideo('${v.key}')">🗑 Sil</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function playVideo(url) {
+      document.getElementById('modal-video').src = url;
+      document.getElementById('player-modal').classList.add('active');
+    }
+
+    function closePlayer() {
+      document.getElementById('modal-video').pause();
+      document.getElementById('modal-video').src = '';
+      document.getElementById('player-modal').classList.remove('active');
+    }
+
+    async function deleteVideo(key) {
+      if (!confirm('Videoyu silmek istediğinize emin misiniz?')) return;
+      const res = await fetch(`${API}/videos/${encodeURIComponent(key)}`, { method: 'DELETE' });
+      if (res.ok) loadVideos();
+      else alert('Silme hatası!');
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function showMessage(id, msg, type) {
+      document.getElementById(id).innerHTML = `<div class="message ${type}">${msg}</div>`;
+      setTimeout(() => document.getElementById(id).innerHTML = '', 4000);
+    }
+
+    loadVideos();
+  </script>
+</body>
+
+</html>
